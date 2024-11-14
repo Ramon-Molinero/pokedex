@@ -259,14 +259,11 @@ export class PokemonService {
    * @description
    *  Este método elimina un Pokémon de la base de datos utilizando su ID. La lógica de eliminación sigue estos pasos:
    *
-   *  1. **Validar el ID**: Verifica si el ID proporcionado es válido usando `isValidObjectId`.
-   *      - Si el ID no es válido, lanza una excepción `BadRequestException`.
+   *  1. **Eliminar el Pokémon**: Intenta encontrar y eliminar el Pokémon en la base de datos usando `deleteOne`.
+   *      - Si no se encuentra el Pokémon o pokemonDeleted.deletedCount === 0, lanza una excepción `BadRequestException`.
    *
-   *  2. **Eliminar el Pokémon**: Intenta encontrar y eliminar el Pokémon en la base de datos usando `findByIdAndDelete`.
-   *      - Si no se encuentra el Pokémon, lanza una excepción `BadRequestException`.
-   *
-   *  3. **Control de errores mediante `_errorHandler`**: Si ocurre un error durante la operación, se delega el manejo de errores a `_errorHandler`, el cual controla las excepciones y lanza:
-   *      - `BadRequestException` en caso de un error de clave duplicada.
+   *  2. **Control de errores mediante `_errorHandler`**: Si ocurre un error durante la operación, se delega el manejo de errores a `_errorHandler`, el cual controla las excepciones y lanza:
+   *      - `BadRequestException` en caso de un error de clave duplicada o no encontrada.
    *      - `InternalServerErrorException` para errores inesperados.
    *
    * @returns {Promise<Pokemon>} - El Pokémon eliminado, si fue encontrado y eliminado con éxito.
@@ -277,16 +274,12 @@ export class PokemonService {
 
   async remove(id: string) {
     try {
+     
+      let pokemonDeleted = await this.pokemonModel.deleteOne( {_id: id} );
       
-      if(!isValidObjectId(id)) 
-        throw new BadRequestException('Invalid Pokemon ID');
-
-      let pokemonDeleted = await this.pokemonModel.findByIdAndDelete(id);
-      
-      if(!pokemonDeleted || pokemonDeleted === null) 
-        throw new BadRequestException('Pokemon not found');
+       if(!pokemonDeleted || pokemonDeleted.deletedCount === 0) 
+         throw new BadRequestException('Pokemon don`t exist');
   
-      
       return pokemonDeleted;
 
     }catch(error){

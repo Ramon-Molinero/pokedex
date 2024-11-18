@@ -5,6 +5,7 @@
 # Ejecutar en desarrollo
 
 1. Clonar el repositorio
+
 2. Ejecutar
 ````
 npm i
@@ -17,6 +18,11 @@ npm i -g @nestjs/cli
 ````
 docker-compose up -d
 ````
+5. Reconstruir db con semilla
+````
+http://localhost:3000/api/v2/seed
+````
+
 
 
 ## Stack utilizado

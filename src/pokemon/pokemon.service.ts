@@ -10,6 +10,7 @@ import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class PokemonService {
@@ -90,29 +91,45 @@ export class PokemonService {
 
   
   /**
-   * @author R.M
-   * @version 1.0
-   *
-   * @description
-   *  Este método recupera todos los Pokémon almacenados en la base de datos. 
-   *  La lógica de obtención sigue los siguientes pasos:
-   *
-   *  1. **Buscar todos los Pokémon**: Realiza una consulta a la base de datos para obtener todos los registros de Pokémon usando `find().exec()`.
-   *  
-   *  2. **Retornar el resultado**: Devuelve una lista con todos los Pokémon encontrados en la base de datos.
-   *  
-   *  3. **Control de errores**: Si ocurre un error durante la obtención de los datos, se captura y lanza una excepción `InternalServerErrorException`.
-   *
-   * @returns {Promise<Pokemon[]>} - Una lista de todos los Pokémon en la base de datos.
-   * 
-   * @throws {BadRequestException} Si alguna propiedad actualizada ya existe en la base de datos (controlado por `_errorHandler`).
-   * @throws {InternalServerErrorException} Si ocurre un error inesperado durante la actualización (controlado por `_errorHandler`).
-   */
+    * @author R.M
+    * @version 1.1
+    *
+    * @param {PaginationDto} paginationDto - DTO que contiene los parámetros de paginación (`limit` y `offset`).
+    *
+    * @description
+    *  Este método recupera una lista paginada de Pokémon almacenados en la base de datos. La lógica de obtención sigue los siguientes pasos:
+    *
+    *  1. **Configurar la Paginación**: Extrae los valores `limit` y `offset` del objeto `paginationDto` para definir la cantidad
+    *     de registros a obtener y el desplazamiento inicial.
+    *  
+    *  2. **Consultar la Base de Datos**: Realiza una consulta a la colección `pokemons` en la base de datos utilizando los
+    *     parámetros de paginación:
+    *      - **`limit`**: Define el número máximo de registros a devolver.
+    *      - **`skip`**: Omite los primeros registros según el valor de `offset`.
+    *      - **`sort`**: Ordena los resultados por el campo `no` en orden ascendente.
+    *      - **`select`**: Excluye el campo `__v` de los resultados.
+    *  
+    *  3. **Retornar el Resultado**: Devuelve la lista de Pokémon encontrados, según los parámetros de paginación.
+    *  
+    *  4. **Control de Errores**: Si ocurre un error durante la operación, se delega el manejo a `_errorHandler`, especificando
+    *     el nombre de la función para facilitar la depuración.
+    *
+    * @returns {Promise<Pokemon[]>} - Una lista paginada de Pokémon encontrados en la base de datos.
+    *
+    * @throws {BadRequestException} Si ocurre un error relacionado con los datos de entrada o la consulta.
+    * @throws {InternalServerErrorException} Si ocurre un error inesperado durante la operación.
+    */
 
-  async findAll(): Promise<Pokemon[]> {
+  async findAll( paginationDto: PaginationDto): Promise<Pokemon[]> {
     try {
 
-      const pokemons = await this.pokemonModel.find().exec();
+      const { limit = 10, offset = 0 } = paginationDto;
+      const pokemons = await this.pokemonModel.find()
+        .limit(limit)
+        .skip(offset)
+        .sort({ no: 1 })
+        .select('-__v');
+
       return pokemons;
 
     } catch (error) {

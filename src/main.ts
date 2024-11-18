@@ -10,6 +10,12 @@ async function bootstrap() {
       {
         whitelist: true,
         forbidNonWhitelisted: true,
+        
+        // * Estas opciones permiten que los valores recibidos por los controladores sean transformados a los tipos de datos que se esperan
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true
+        }
       }
     )
   );

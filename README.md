@@ -31,6 +31,26 @@ http://localhost:3000/api/v2/seed
 
 
 
-## Stack utilizado
+# Stack utilizado
 * MongoDb
 * Nest
+
+# Production Build
+1. Crear archivo ```.env.prod```
+2. Llenar las variables de entorno de producción
+3. Crear y configurar ```docker-compose.prod.yaml```
+4. Construir la nueva imagen
+```
+docker-compose -f docker-compose.prod.yaml --env-file .env.prod up --build
+```
+5. Si se destruye el contenedor pero no hay cambios en la aplicación usaremos este comando
+```
+docker-compose -f docker-compose.prod.yaml --env-file .env.prod up -d
+```
+
+# Notas
+
+  Desplegado en ```Render```
+````
+https://pokedex-as40.onrender.com/api/v2/pokemon
+````
